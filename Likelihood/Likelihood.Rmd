@@ -1,0 +1,68 @@
+---
+title: "Bayesian Wine Data Analysis"
+author: "Peter Roessler-Caram"
+date: "5/7/2019"
+output:  github_document
+---
+
+```{r, message = FALSE}
+library(ggplot2)
+library(ggmap)
+library(readxl)
+library(tidyverse)
+library(maps)
+library(maptools)
+library(mapdata)
+library(ggthemes)
+library(viridis)
+library(mapproj)
+```
+
+```{r}
+wine_data<-read_excel("/cloud/project/Data/Wine_MN.xlsx")
+```
+
+```{r}
+wine_mn <- wine_data 
+mean(wine_mn$price)
+##Find the average price for each province
+```
+#Data Exploration
+```{r}
+wine_mn %>% 
+  ggplot() +
+  geom_histogram(mapping = aes(x=price), binwidth = 1, fill = "light blue", color = "black")
+##Plot average price for each province as a histogram
+```
+
+#Data Analysis
+```{r}
+library(pastecs)
+library(fitdistrplus)
+```
+The goal here is to uncover sample statistics from our dataset and then an estimation of the distribution.
+
+```{r}
+stat.desc(wine_mn$price)
+##Sample Statistics
+```
+
+```{r}
+descdist(wine_mn$price, discrete = FALSE)
+##Estimation of skewness and Pearson's Kurtosis values
+```
+The plot above helps us to estimate what possible distribution our dataset is. The Blue dot represents where our distribution lies. From the plot, we can assume that our dataset follows either a beta, gamma, and possibly a weibull distribution. 
+This isn't definitive, but can help narrow down our search.
+
+
+```{r}
+fit_lnorm_mle <- fitdist(wine_mn$price, "lnorm", method = "mle")
+plot(fit_lnorm_mle)
+summary(fit_lnorm_mle)
+```
+
+```{r}
+fit_lnorm_mom <- fitdist(wine_mn$price, "lnorm", method = "mge")
+plot(fit_lnorm_mom)
+summary(fit_lnorm_mom)
+```
